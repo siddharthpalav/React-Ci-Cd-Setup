@@ -36,5 +36,5 @@ jobs:
       # CHANGES ARE IN THIS STEP BELOW
       - name: "Deploy to vercel"
         run: |
-          vercel pull --yes --environment=production --name=reactcicd --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel pull --yes --environment=production --project=reactcicd --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
