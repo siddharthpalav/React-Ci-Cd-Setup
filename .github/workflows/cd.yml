@@ -36,4 +36,11 @@ jobs:
       # CHANGES ARE IN THIS STEP BELOW
       - name: "Deploy to vercel"
         run: |
-          vercel deploy --prod --yes --name=reactcicd --token=${{ secrets.VERCEL_TOKEN }}
+          # 1. Pull down Vercel configurations and create a local build-ready link
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+          # 2. Tell Vercel to build locally (this registers your 'dist' folder)
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+          # 3. Deploy the precompiled local build instantly
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
