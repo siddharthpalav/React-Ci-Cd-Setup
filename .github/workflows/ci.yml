@@ -11,26 +11,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Pull the code from GitHub first so package.json and eslint.config.js exist
+      - name: "Clone the repository"
+        uses: actions/checkout@v4
+
+      # 2. Set up the Node environment now that the repo is present
       - name: "Setup Node JS"
         uses: actions/setup-node@v4
         with:
           node-version: "24"
+          cache: "npm" # Speeds up future runs by caching your node_modules
 
       - name: "Check node version"
         run: node --version
 
-      - name: "Clone the repository"
-        uses: actions/checkout@v2
-
-      - name: "List directories"
-        run: ls
-
+      # 3. Perform a clean installation of your dependencies
       - name: "Install dependencies"
         run: npm ci
 
-      - name: "List directories"
-        run: ls
-
+      # 4. Run your quality checks and build steps
       - name: "Run lint"
         run: npm run lint
 
@@ -40,6 +39,7 @@ jobs:
       - name: "Run build"
         run: npm run build
 
+      # 5. Save the production-ready assets
       - name: "Upload product-ready build files"
         uses: actions/upload-artifact@v4
         with:
