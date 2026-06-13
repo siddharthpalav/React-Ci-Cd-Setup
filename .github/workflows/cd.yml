@@ -1,0 +1,44 @@
+name: "CD Pipeline"
+
+on:
+  workflow_run:
+    workflows: ["Sample React CI Pipeline / Workflow"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    # CRITICAL: Ensures it only deploys if the CI pipeline actually passed
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      # 1. Pull down the repository so Vercel can see your configuration configs
+      - name: "Clone the repository"
+        uses: actions/checkout@v4
+
+      - name: "Setup nodejs"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: "Setup vercel cli"
+        run: npm install -g vercel
+
+      # 2. Download the pre-built files from the successful CI pipeline run
+      - name: "Download build files"
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+          # Safe conditional check depending on how the pipeline was triggered
+          run-id: ${{ github.event.workflow_run.id || github.run_id }}
+          github-token: ${{ github.token }}
+          path: dist # Forces artifact extraction directly into the dist directory
+
+      # 3. Pull settings down and push production live
+      - name: "Deploy to vercel"
+        run: |
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --name=cicdproject
